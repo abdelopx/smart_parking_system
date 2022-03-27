@@ -8,14 +8,36 @@ import {
 } from "firebase/firestore";
 
 import { useState, useEffect } from "react";
+import { Audio } from 'expo-av';
+import Toast from "react-native-toast-message";
 import { database } from "../Core/Config";
 import MapView from "react-native-maps";
 import { Marker } from "react-native-maps";
 import React from "react";
 
+const showToastFree = () => {
+  Toast.show({
+    type: "success",
+    text1: "A parking spot has been changed",
+    position: "bottom",
+    visibilityTime: 1200,
+  });
+};
+
 const Map = () => {
   const [spots, setSpots] = useState([]);
+  const [sound, setSound] = useState();
   const [isLoading, setIsLoading] = useState(false);
+
+  async function playSound() {
+    console.log('Loading Sound');
+    const { sound } = await Audio.Sound.createAsync(
+       require('../assets/notification.mp3')
+    );
+    setSound(sound);
+
+    console.log('Playing Sound');
+    await sound.playAsync(); }
 
   const getSpots = async () => {
     let fetchedSpots = [];
@@ -23,6 +45,8 @@ const Map = () => {
     querySnapshot.forEach((doc) => {
       fetchedSpots.push(doc.data());
     });
+    showToastFree();
+    playSound();
     setSpots(fetchedSpots);
   };
 
@@ -71,6 +95,27 @@ const Map = () => {
           );
         }
       })}
+      <Marker
+        coordinate={{
+          latitude: 33.542093,
+          longitude: -5.105102,
+        }}
+        image={require("../assets/images/busy_spot.png")}
+      />
+      <Marker
+        coordinate={{
+          latitude: 33.542035,
+          longitude: -5.105145,
+        }}
+        image={require("../assets/images/free_spot.png")}
+      />
+      <Marker
+        coordinate={{
+          latitude: 33.541998,
+          longitude: -5.105174,
+        }}
+        image={require("../assets/images/busy_spot.png")}
+      />
     </MapView>
   );
 };
